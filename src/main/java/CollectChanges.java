@@ -35,7 +35,7 @@ public class CollectChanges {
 		
 		try {
 			//Change db.properties.
-			db = new DBManager("db.properties");
+			db = new DBManager("src/main/resources/db.properties");
 
 			//Connect DB.
 			Connection con = db.getConnection();
@@ -75,11 +75,6 @@ public class CollectChanges {
 			PreparedStatement psTime = con.prepareStatement("insert into changes_GT_runtime " +
 					" (file_id, runtime_gitReset, runtime_editScript)" +
 					" values(?, ?, ?)");
-
-			// Collect Practically these files are deleted/inserted.
-			PreparedStatement psDeletedFileId = con.prepareStatement("insert into changes_GT_deleted " +
-					" (file_id, project_name, commit_id, old_commit, new_commit) +" +
-					" values(?, ?, ?, ?, ?) " );
 
 			// use command line arguments
 			String project = args[0];
@@ -141,13 +136,8 @@ public class CollectChanges {
 					if (oldCode.length() == 0 || newCode.length() == 0) {
 						//Practically these files are deleted/inserted.
 						//System.out.println("File " + fileId + "s are practically deleted or inserted.");
-						psDeletedFileId.clearParameters();
-						psDeletedFileId.setInt(1, Integer.parseInt(fileId));
-						psDeletedFileId.setString(2, project);
-						psDeletedFileId.setString(3, commitId);
-						psDeletedFileId.setString(4, oldCommitId);
-						psDeletedFileId.setString(5, newCommitId);
-						psDeletedFileId.addBatch();
+						log.info("FileId : {} is practically deleted or inserted. And, commitId : {}, " +
+								"oldCommitId : {}, newCommitId: {}", fileId, commitId, oldCommitId, newCommitId);
 						continue;
 					}
 
@@ -175,8 +165,6 @@ public class CollectChanges {
 					}
 
 					if (commitCount % 100 == 0) {
-						psDeletedFileId.executeBatch();
-						psDeletedFileId.clearBatch();
 						psIns.executeBatch();
 						psIns.clearBatch();
 						psTime.executeBatch();
@@ -185,11 +173,9 @@ public class CollectChanges {
 					}
 
 					// Committing for the rest of the syntax that has not been committed
-					psDeletedFileId.executeBatch();
 					psIns.executeBatch();
 					psTime.executeBatch();
 					con.commit();
-					psDeletedFileId.clearBatch();
 					psIns.clearBatch();
 					psTime.clearBatch();
 
@@ -225,7 +211,6 @@ public class CollectChanges {
 
 			}
 
-			psDeletedFileId.close();
 			psTime.close();
 			psIns.close();
 
