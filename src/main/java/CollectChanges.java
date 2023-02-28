@@ -9,6 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,14 +27,23 @@ public class CollectChanges {
 	public static final String newDir = "new";
 	public static long commitCount = 1;
 
-	public final static Logger log = LoggerFactory.getLogger(CollectChanges.class);
+	//public final static Logger log = LoggerFactory.getLogger(CollectChanges.class);
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 
 		//Select SCD Tool here.
 		//String tool = "ChangeDistiller";
 		String tool = "GumTree";
 		DBManager db = null;
+
+		File file = new File("/exp/JcodeLib-log/GT-Alluxio.txt");
+
+		if (!file.exists()) {
+			file.createNewFile();
+		}
+
+		FileWriter fw = new FileWriter(file);
+		PrintWriter writer = new PrintWriter(fw);
 		
 		try {
 			//Change db.properties.
@@ -136,8 +148,12 @@ public class CollectChanges {
 					if (oldCode.length() == 0 || newCode.length() == 0) {
 						//Practically these files are deleted/inserted.
 						//System.out.println("File " + fileId + "s are practically deleted or inserted.");
-						log.info("FileId : {} is practically deleted or inserted. And, commitId : {}, " +
-								"oldCommitId : {}, newCommitId: {}", fileId, commitId, oldCommitId, newCommitId);
+//						log.info("FileId : {} is practically deleted or inserted. And, commitId : {}, " +
+//								"oldCommitId : {}, newCommitId: {}", fileId, commitId, oldCommitId, newCommitId);
+
+						writer.println("FileId : " + fileId + ", commitId : " + commitId
+								+ ", oldCommitId : " + oldCommitId + ", newCommitId : " + newCommitId
+								+ " is practically deleted or inserted.");
 						continue;
 					}
 
@@ -196,9 +212,12 @@ public class CollectChanges {
 //						}
 
 				} catch (Exception e) {
-					log.error("In project {}, running error while processing fileId : {}, " +
-									"commitId : {}, oldCommitId : {}, newCommitId : {}",
-							project, fileId, commitId, oldCommitId, newCommitId);
+//					log.error("In project {}, running error while processing fileId : {}, " +
+//									"commitId : {}, oldCommitId : {}, newCommitId : {}",
+//							project, fileId, commitId, oldCommitId, newCommitId);
+					writer.println("In project [" + project + "], running error while processing " +
+							"fileId : " + fileId + ", commitId : " + commitId
+							+ ", oldCommitId : " + oldCommitId + ", newCommitId : " + newCommitId );
 					e.printStackTrace();
 					try {
 						// If failed, do rollback
@@ -219,5 +238,6 @@ public class CollectChanges {
 		} finally {
 			db.close();
 		}
+		writer.close();
 	}
 }
