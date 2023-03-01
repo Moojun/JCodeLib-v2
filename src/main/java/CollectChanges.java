@@ -36,7 +36,7 @@ public class CollectChanges {
 		String tool = "GumTree";
 		DBManager db = null;
 
-		File file = new File("/exp/JcodeLib-log/GT-Alluxio.txt");
+		File file = new File("/exp/JCodeLib-log/GT-Alluxio.txt");
 
 		if (!file.exists()) {
 			file.createNewFile();
@@ -139,8 +139,8 @@ public class CollectChanges {
 				long gitResetElapsedTime = gitResetFinishTime - gitResetStartTime;
 
 				try {
-					if(!filePath.contains("/org/"))
-						continue;
+//					if(!filePath.contains("/org/"))
+//						continue;
 					File oldFile = new File(oldReposPath + filePath);
 					File newFile = new File(newReposPath + filePath);
 					String oldCode = FileIOManager.getContent(oldFile).intern();
@@ -151,7 +151,7 @@ public class CollectChanges {
 //						log.info("FileId : {} is practically deleted or inserted. And, commitId : {}, " +
 //								"oldCommitId : {}, newCommitId: {}", fileId, commitId, oldCommitId, newCommitId);
 
-						writer.println("FileId : " + fileId + ", commitId : " + commitId
+						writer.println("1. FileId : " + fileId + ", commitId : " + commitId
 								+ ", oldCommitId : " + oldCommitId + ", newCommitId : " + newCommitId
 								+ " is practically deleted or inserted.");
 						continue;
@@ -215,7 +215,7 @@ public class CollectChanges {
 //					log.error("In project {}, running error while processing fileId : {}, " +
 //									"commitId : {}, oldCommitId : {}, newCommitId : {}",
 //							project, fileId, commitId, oldCommitId, newCommitId);
-					writer.println("In project [" + project + "], running error while processing " +
+					writer.println("2. In project [" + project + "], running error while processing " +
 							"fileId : " + fileId + ", commitId : " + commitId
 							+ ", oldCommitId : " + oldCommitId + ", newCommitId : " + newCommitId );
 					e.printStackTrace();
