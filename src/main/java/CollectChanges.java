@@ -17,6 +17,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class CollectChanges {
@@ -26,6 +27,7 @@ public class CollectChanges {
 	public static final String oldDir = "old";
 	public static final String newDir = "new";
 	public static long commitCount = 1;
+	public static String [] projectArr = {"elasticsearch", "ballerina-lang", "crate", "neo4j","sakai", "wildfly"};
 
 	//public final static Logger log = LoggerFactory.getLogger(CollectChanges.class);
 	
@@ -54,29 +56,6 @@ public class CollectChanges {
 
 			// if exception occurs, do rollback
 			con.setAutoCommit(false);
-
-			/**
-			 * Replace the below code with Command Line args
-			 */
-			/*
-			//Collect project name.
-			PreparedStatement pstmt = con.prepareStatement("SELECT name FROM subjects");
-			ResultSet resultSet = pstmt.executeQuery();
-
-            StringBuilder tmp = new StringBuilder();
-
-            resultSet.next();
-            tmp.append(resultSet.getString("name"));
-
-            while (resultSet.next()) {
-                tmp.append(",").append(resultSet.getString("name"));
-            }
-
-            projects = tmp.toString().split(",");
-
-            resultSet.close();
-			pstmt.close();
-			 */
 
 			// Collect and store file_id, tool, change_type, entity_type, start_pos, script, run_time in DB.
 			PreparedStatement psIns = con.prepareStatement("insert into changes_GT " +
@@ -139,8 +118,13 @@ public class CollectChanges {
 				long gitResetElapsedTime = gitResetFinishTime - gitResetStartTime;
 
 				try {
-//					if(!filePath.contains("/org/"))
-//						continue;
+					if (!filePath.contains("/test/")) // ignore test code in GitHub project
+						continue;
+
+					List<String> projectList = new ArrayList<>(Arrays.asList(projectArr));
+					if(!filePath.contains("/org/") && projectList.contains(project))
+						continue;
+
 					File oldFile = new File(oldReposPath + filePath);
 					File newFile = new File(newReposPath + filePath);
 					String oldCode = FileIOManager.getContent(oldFile).intern();
