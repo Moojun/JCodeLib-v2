@@ -118,7 +118,7 @@ public class CollectChanges {
 				long gitResetElapsedTime = gitResetFinishTime - gitResetStartTime;
 
 				try {
-					if (!filePath.contains("/test/")) // ignore test code in GitHub project
+					if (filePath.contains("/test/")) // ignore test code in GitHub project
 						continue;
 
 					List<String> projectList = new ArrayList<>(Arrays.asList(projectArr));
